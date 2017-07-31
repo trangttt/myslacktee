@@ -57,23 +57,18 @@ function parse_args()
                 exit 0
                 ;;
 
-            -t|--title)
-                title="$1"
-                shift
-                ;;
-
             -c| --channel)
-                channel="$1"
+                opt_channel="$1"
                 shift
                 ;;
 
             -u| --username)
-                username="$1"
+                opt_username="$1"
                 shift
                 ;; 
 
             -i| --icon)
-                icon="$1"
+                opt_icon="$1"
                 shift
                 ;;
 
@@ -189,6 +184,11 @@ function setup_environment()
         # shellcheck disable=SC1091,SC1090
         . "$HOME/.myslacktee"
     fi
+
+    # Override variables with value from commandline if exist
+    channel=${opt_channel:-$channel}
+    username=${opt_username:-$username}
+    icon=${opt_icon:-$icon}
 }
 
 
@@ -206,14 +206,18 @@ function check_configuration(){
     fi
 
     if [[ -z ${channel} ]]; then
-        err_exit 1 "Please run again with --setup to setup."
+        err_exit 1 "Please run again with --setup to setup or -c|--channel to set temporary channel."
     fi
 
     if [[ -z "${icon}" ]]; then
-        err_exit 1 "Please run again with --setup to setup."
+        err_exit 1 "Please run again with --setup to setup or -i|--icon to set temporary icon."
     else
         icon=${icon#:} # remove leading ':'
         icon=${icon%:} # remove trailing '%'
+    fi
+
+    if [[ -z "${username}" ]]; then
+        err_exit 1 "Please run again with --setup to setup or -u||--username to set temporary username."
     fi
 }
 
@@ -225,7 +229,8 @@ function check_configuration(){
 
 function send_message()
 {
-    message="$1"
+    webhook_url="$1"
+    message="$2"
     data="{\"channel\": \"$channel\", \
         \"icon_emoji\": \":${icon}:\", \
         \"username\": \"$username\",

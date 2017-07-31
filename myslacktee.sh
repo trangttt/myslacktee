@@ -50,7 +50,7 @@ function main(){
     while IFS='' read -r line; do
         process_line "$line"
     done
-    send_message "$text" 
+    send_message "$webhook_url"  "$text" 
 }
 
 main "$@"
